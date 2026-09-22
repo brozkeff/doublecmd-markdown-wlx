@@ -1,14 +1,11 @@
 # Plans
 
-## v0.2.0
+## v0.2.0 Rust rewrite
 
-- [ ] Replace the entire Pascal/Lazarus implementation with Rust.
-  - Keep the standalone Linux WLX plugin interface and Qt/GTK compatibility.
-  - Load the host widgetset libraries dynamically instead of compiling the
-    plugin with Pascal/Lazarus.
-  - Preserve the safe Markdown subset, input-size limit, and ABI smoke tests.
-
-Double Commander itself may remain compiled with Pascal/Lazarus. Its plugin
-ABI does not require independently developed plugins to use the same language
-or toolchain, so the rewrite can reduce the plugin's build-time and runtime
-coupling to Lazarus while retaining compatibility with Double Commander.
+- [x] Replace the Pascal/Lazarus implementation with a Rust Qt5 WLX plugin.
+- [x] Keep Qt widget construction in a narrow C++ shim and retain the WLX ABI.
+- [x] Replace the custom parser with CommonMark and selected GFM extensions.
+- [x] Preserve the 4 MiB input limit and prevent active content or resource loads.
+- [x] Archive the v0.1 implementation under `v0.1/` for review.
+- [x] Add Rust build and ABI smoke-test scripts.
+- [x] Supersede prior implementation and scope decisions without deleting ADR history.

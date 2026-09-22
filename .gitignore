@@ -1,5 +1,6 @@
 lib/
 build/
+target/
 .build-libs/
 .lazarus-config/
 *.compiled

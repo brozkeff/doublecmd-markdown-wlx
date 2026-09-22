@@ -1,8 +1,10 @@
 ---
-status: Accepted
+status: Superseded
 date: 2026-09-22
 ---
 # Strip Release Plugin Artifacts
+
+Superseded by [ADR 0005](0005-rust-rewrite-and-qt5-primary.md).
 
 ## Context and Problem Statement
 

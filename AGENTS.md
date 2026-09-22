@@ -1,21 +1,31 @@
 # Agent Notes
 
-This repository contains a standalone Linux WLX (Lister) plugin for Double
-Commander. It is written in Free Pascal/Lazarus, uses the minimal API
-declarations in `sdk/`, and provides Qt5, Qt6, GTK2, and GTK3 backends. The
-implementation and documentation are licensed under EUPL 1.2; copyright is
-held by Martin Brozkeff Malec. See `README.md` and `LICENSE` before changing
-distribution or attribution details.
+This repository contains a standalone Linux Qt5 WLX (Lister) plugin for
+Double Commander. The production plugin is a Rust `cdylib`; a small
+exception-safe C++ shim in `src/qt5_shim.cpp` is the only Qt widget boundary.
+The source and documentation are licensed under EUPL 1.2; copyright is held
+by Martin Brozkeff Malec. See `README.md`, `LICENSE`, and
+`THIRD-PARTY-NOTICES.md` before changing distribution or attribution details.
 
-Important limits: the renderer supports only a safe Markdown subset, does not
-process active content or remote resources, and rejects previews larger than
-4 MiB. Use `./scripts/build.sh {qt5|qt6|gtk2|gtk3|all}` and
-`./scripts/smoke-test.sh` when dependencies are available. Build outputs and
-local compiler state are ignored; release binaries are published manually as
-GitHub release assets. There are no GitHub Actions currently.
+The renderer uses `pulldown-cmark` with a safe event filter. Keep raw HTML
+escaped, link destinations and image resources inactive, scripts and remote
+resources disabled, and the preview limit at 4 MiB. Keep unsafe Rust code at
+the WLX/Qt FFI boundary, document each unsafe block with a local `SAFETY`
+comment, and prevent Rust panics and C++ exceptions from crossing the C ABI.
+
+Build the Qt5 plugin with `./scripts/build.sh qt5` and run
+`./scripts/smoke-test.sh`. Outputs belong in ignored `build/`; Cargo state is
+under ignored `target/`. Run `cargo fmt --all -- --check`, `cargo test
+--locked`, and `cargo clippy --locked --all-targets -- -D warnings` when
+validating code changes. For release validation, manually test F3 in matching
+Qt5 Double Commander; the v0.2.0 build has been confirmed in the host.
+
+The replaced v0.1 Pascal sources and build scripts are retained under `v0.1/`
+for review and may be removed later. Release binaries are published manually
+as GitHub release assets; there are no GitHub Actions.
 
 Architecture decisions are in `docs/decisions/`, starting at `0001`. Write a
-new numbered ADR for a significant decision: use minimal YAML metadata
+new numbered ADR for a significant decision using minimal YAML metadata
 (`status`, `date`), an H1 title, and the required `Context and Problem
 Statement` and `Decision Outcome` sections. Keep it to two or three short
 paragraphs, mark confirmed decisions `Accepted`, and supersede rather than

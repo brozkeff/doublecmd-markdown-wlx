@@ -4,6 +4,32 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [v0.2.0] - 2026-09-22
+
+### Changed
+
+- Replaced the Pascal/Lazarus implementation with a Rust Qt5 WLX plugin.
+- Replaced the custom Markdown subset parser with `pulldown-cmark` CommonMark
+  and tables, task lists, strikethrough, and footnotes.
+- Archived replaced v0.1 implementation files under `v0.1/` for review.
+
+### Security
+
+- Keep the 4 MiB preview limit and safely replace invalid UTF-8.
+- Display raw HTML only as escaped text; do not navigate Markdown links, load
+  images or remote resources, or execute active content.
+- Contain Rust panics and C++ exceptions at the WLX boundary.
+
+### Tested
+
+- Manually verified F3 preview in Qt5 Double Commander.
+
+### Build
+
+- Build the Qt5 plugin as a Rust `cdylib` with a minimal C++ widget shim.
+- Keep Qt5 dynamically linked and strip debug information from the release
+  artifact.
+
 ## [v0.1.1] - 2026-09-22
 
 ### Changed
@@ -41,8 +67,3 @@ All notable changes to this project are documented here. The format follows
 - WLX symbol exports and shared-library loading.
 - Qt5 F3 integration with Double Commander 1.2.8; GTK2, GTK3, and Qt6 remain
   untested interactively in Double Commander.
-
-### Not yet tested
-
-- GTK2, GTK3, and Qt6 F3 integration in a running Double Commander instance.
-- Full CommonMark or GitHub-Flavored Markdown compatibility.
