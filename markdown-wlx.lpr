@@ -171,7 +171,7 @@ end;
 
 function MarkdownWlxVersion: PAnsiChar; dcpcall;
 begin
-  Result := '0.1.0';
+  Result := '0.1.1';
 end;
 
 exports

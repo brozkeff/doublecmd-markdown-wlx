@@ -10,6 +10,7 @@ LAZARUS_DIR=${LAZARUS_DIR:-/usr/share/lazarus/4.8.0}
 PCP=${LAZARUS_PCP:-"$ROOT/.lazarus-config"}
 LINK_DIR="$ROOT/.build-libs"
 BUILD_DIR="$ROOT/build"
+STRIP=${STRIP:-strip}
 
 usage() {
   printf 'Usage: %s {qt5|qt6|gtk2|gtk3|all}\n' "$0" >&2
@@ -47,6 +48,14 @@ build_one() {
     --ws="$widgetset" \
     --opt="-k-L$LINK_DIR" \
     "$ROOT/markdown-wlx.lpi"
+
+  # Lazarus/FPC emits debug and linker symbol sections unless explicitly
+  # stripped. Keep release artifacts small while preserving exported WLX and
+  # dynamic-library symbols needed by the loader.
+  for artifact in "$BUILD_DIR"/*-"$widgetset".wlx; do
+    [ -f "$artifact" ] || continue
+    "$STRIP" --strip-unneeded "$artifact"
+  done
 }
 
 case "$1" in

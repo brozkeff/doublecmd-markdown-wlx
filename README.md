@@ -107,6 +107,18 @@ The output files are written below `build/`:
 - `build/markdown-wlx-x86_64-linux-gtk2.wlx`;
 - `build/markdown-wlx-x86_64-linux-gtk3.wlx`.
 
+The build script strips release artifacts automatically. This removes compiler
+debug information and non-loadable symbol tables; the exported WLX entry
+points and runtime dependencies remain intact. Set `STRIP` to an alternative
+target strip tool when cross-compiling.
+
+The Qt and GTK widgetset units from Lazarus are compiled into each plugin, as
+Pascal LCL packages are not runtime-shared libraries in this build. The Qt,
+GTK, and QtPas libraries themselves remain dynamic dependencies supplied by
+the host system. This is why the unstripped Qt artifacts were large even
+though Qt was not statically linked, and why stripping reduces them from about
+30 MiB to about 10 MiB on the development system.
+
 Generated compiler units, local Lazarus configuration, linker shims, and `.wlx`
 artifacts under `build/` are ignored by Git. The binaries remain available in
 the working tree for local installation and release testing, but are not

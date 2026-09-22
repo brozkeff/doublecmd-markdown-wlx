@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [v0.1.1] - 2026-09-22
+
+### Changed
+
+- Strip release WLX artifacts to remove debug information and non-loadable
+  symbol tables, reducing Qt5 and Qt6 binaries from about 30 MiB to about
+  10 MiB while retaining dynamic Qt/QtPas dependencies and exported WLX
+  symbols.
+
 ## [v0.1.0] - 2026-09-22
 
 ### Added

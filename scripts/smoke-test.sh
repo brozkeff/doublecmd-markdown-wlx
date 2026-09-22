@@ -31,7 +31,7 @@ license.restype = ctypes.c_char_p
 assert b'EUPL 1.2' in license(), license()
 version = plugin.MarkdownWlxVersion
 version.restype = ctypes.c_char_p
-assert version() == b'0.1.0', version()
+assert version() == b'0.1.1', version()
 print(f"ok: {os.path.basename(os.environ['PLUGIN'])}: {buffer.value.decode()}")
 PY
 }
