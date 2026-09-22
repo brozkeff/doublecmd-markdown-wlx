@@ -1,0 +1,9 @@
+lib/
+build/
+.build-libs/
+.lazarus-config/
+*.compiled
+*.ppu
+*.o
+link*.res
+*.wlx
