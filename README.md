@@ -105,4 +105,6 @@ build/                        Ignored generated WLX artifact
 ```
 
 Project version history is in [CHANGELOG.md](CHANGELOG.md). Architecture
-decisions are in [`docs/decisions/`](docs/decisions/).
+decisions are in [`docs/decisions/`](docs/decisions/). Read the [Rust and Qt
+boundary assessment](docs/security/rust-qt-ffi-assessment-2026-09-23.md) for
+the FFI lifecycle findings.
