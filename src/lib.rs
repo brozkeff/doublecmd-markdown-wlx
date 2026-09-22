@@ -9,6 +9,10 @@
 
 mod markdown;
 
+#[cfg(test)]
+#[path = "../tests/unit/plugin.rs"]
+mod tests;
+
 use std::ffi::{c_char, c_void, CStr, OsStr};
 use std::fs::OpenOptions;
 use std::io::Read;
@@ -18,7 +22,7 @@ use std::path::{Path, PathBuf};
 const MAX_PREVIEW_BYTES: usize = 4 * 1024 * 1024;
 const DETECT_STRING: &[u8] = b"EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MDOWN\"";
 const LICENSE: &[u8] = b"Copyright (C) 2026 Martin Brozkeff Malec; licensed under the EUPL 1.2\0";
-const VERSION: &[u8] = b"0.2.0\0";
+const VERSION: &[u8] = b"0.2.1\0";
 
 unsafe extern "C" {
     fn markdown_wlx_qt5_create(
@@ -161,63 +165,4 @@ pub extern "C" fn MarkdownWlxLicense() -> *const c_char {
 #[no_mangle]
 pub extern "C" fn MarkdownWlxVersion() -> *const c_char {
     VERSION.as_ptr().cast()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{read_source, source_from_bytes, write_detect_string, MAX_PREVIEW_BYTES};
-
-    #[test]
-    fn strips_utf8_bom_and_replaces_invalid_sequences() {
-        assert_eq!(
-            source_from_bytes(b"\xef\xbb\xbfhello".to_vec()),
-            Ok("hello".into())
-        );
-        assert_eq!(source_from_bytes(vec![b'a', 0xff]), Ok("a\u{fffd}".into()));
-    }
-
-    #[test]
-    fn enforces_the_preview_size_limit() {
-        assert_eq!(
-            source_from_bytes(vec![b'a'; MAX_PREVIEW_BYTES])
-                .unwrap()
-                .len(),
-            MAX_PREVIEW_BYTES
-        );
-        assert!(source_from_bytes(vec![b'a'; MAX_PREVIEW_BYTES + 1]).is_err());
-    }
-
-    #[test]
-    fn rejects_non_regular_inputs() {
-        assert!(read_source(std::path::Path::new("/dev/null")).is_err());
-    }
-
-    #[test]
-    fn detection_string_is_nul_terminated_and_truncated_safely() {
-        let mut output = [0xff; 64];
-        write_detect_string(&mut output);
-        assert_eq!(
-            &output[..DETECT_LEN],
-            b"EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MDOWN\""
-        );
-        assert_eq!(output[DETECT_LEN], 0);
-
-        let mut short = [0xff; 5];
-        write_detect_string(&mut short);
-        assert_eq!(&short, b"EXT=\0");
-    }
-
-    const DETECT_LEN: usize = b"EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MDOWN\"".len();
-}
-
-#[cfg(test)]
-mod markdown_tests {
-    use super::markdown::render_to_html;
-
-    #[test]
-    fn empty_input_still_returns_a_complete_document() {
-        let html = render_to_html("");
-        assert!(html.starts_with("<!doctype html>"));
-        assert!(html.ends_with("</body></html>"));
-    }
 }

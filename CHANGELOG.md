@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [v0.2.1] - 2026-09-22
+
+### Fixed
+
+- Escape now closes the active Qt5 Lister window.
+
+### Changed
+
+- Move Rust unit test bodies into separate files under `tests/unit/`.
+
 ## [v0.2.0] - 2026-09-22
 
 ### Changed

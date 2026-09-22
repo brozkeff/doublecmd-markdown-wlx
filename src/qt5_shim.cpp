@@ -2,15 +2,36 @@
 // Licensed under the EUPL, Version 1.2. This is the complete Qt unsafe shim.
 
 #include <QTextBrowser>
+#include <QKeyEvent>
 #include <QTextOption>
 #include <QEvent>
 #include <QObject>
 #include <QPointer>
+#include <QTimer>
 #include <QWidget>
 
 #include <climits>
 #include <cstddef>
 #include <memory>
+
+class MarkdownTextBrowser final : public QTextBrowser {
+public:
+  explicit MarkdownTextBrowser(QWidget *parent) : QTextBrowser(parent) {}
+
+protected:
+  void keyPressEvent(QKeyEvent *event) override {
+    if (event->key() == Qt::Key_Escape) {
+      auto *viewer_window = window();
+      if (viewer_window != this) {
+        // Let the host perform its normal close and WLX teardown sequence.
+        event->accept();
+        QTimer::singleShot(0, viewer_window, &QWidget::close);
+        return;
+      }
+    }
+    QTextBrowser::keyPressEvent(event);
+  }
+};
 
 class ParentResizeFilter final : public QObject {
 public:
@@ -39,7 +60,7 @@ extern "C" void *markdown_wlx_qt5_create(void *parent_handle,
 
   try {
     auto *parent = static_cast<QWidget *>(parent_handle);
-    auto browser = std::make_unique<QTextBrowser>(parent);
+    auto browser = std::make_unique<MarkdownTextBrowser>(parent);
     browser->setReadOnly(true);
     browser->setOpenLinks(false);
     browser->setOpenExternalLinks(false);

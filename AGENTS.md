@@ -20,6 +20,9 @@ under ignored `target/`. Run `cargo fmt --all -- --check`, `cargo test
 validating code changes. For release validation, manually test F3 in matching
 Qt5 Double Commander; the v0.2.0 build has been confirmed in the host.
 
+Keep Rust test bodies in separate files under `tests/unit/`; use test-only
+path modules when tests need access to private helpers.
+
 The replaced v0.1 Pascal sources and build scripts are retained under `v0.1/`
 for review and may be removed later. Release binaries are published manually
 as GitHub release assets; there are no GitHub Actions.

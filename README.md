@@ -13,6 +13,7 @@ The plugin claims `.md`, `.markdown`, and `.mdown` files and renders CommonMark
 with tables, task lists, strikethrough, and footnotes. It also supports
 headings, paragraphs, lists, emphasis, inline and fenced code, block quotes,
 and UTF-8 files with an optional UTF-8 BOM.
+Press Escape to close the active Lister window.
 
 Raw HTML is displayed as escaped text. Markdown links are rendered as their
 labels, and images as their alt text. Link destinations and image resources
@@ -95,7 +96,7 @@ build.rs                     Qt5 C++ shim build configuration
 src/lib.rs                   WLX ABI and bounded file handling
 src/markdown.rs              Safe Markdown event filtering and rendering
 src/qt5_shim.cpp             Minimal Qt5 widget bridge
-tests/                       Renderer and offscreen Qt host tests
+tests/                       Separate Rust unit tests and offscreen Qt host checks
 benchmarks/                  Shared renderer benchmark fixture and harness
 scripts/build.sh             Qt5 release build
 scripts/smoke-test.sh        ABI and load smoke test

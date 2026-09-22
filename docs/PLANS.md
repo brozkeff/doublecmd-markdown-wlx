@@ -9,3 +9,8 @@
 - [x] Archive the v0.1 implementation under `v0.1/` for review.
 - [x] Add Rust build and ABI smoke-test scripts.
 - [x] Supersede prior implementation and scope decisions without deleting ADR history.
+
+## v0.2.1 follow-up
+
+- [x] Close the active Qt5 Lister window on Escape.
+- [x] Keep Rust unit test bodies in separate files under `tests/unit/`.
