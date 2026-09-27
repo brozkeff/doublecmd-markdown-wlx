@@ -6,20 +6,38 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-ARCH=$(uname -m)
-PLUGIN="$ROOT/build/markdown-wlx-$ARCH-linux-qt5.wlx"
+. "$ROOT/scripts/platform.sh"
+PLUGIN="$ROOT/build/$PLUGIN_NAME"
 
 [ -f "$PLUGIN" ] || {
   printf 'missing plugin: %s\n' "$PLUGIN" >&2
   exit 1
 }
 
-nm -D --defined-only "$PLUGIN" | grep -q ' ListLoad$'
-nm -D --defined-only "$PLUGIN" | grep -q ' ListCloseWindow$'
-nm -D --defined-only "$PLUGIN" | grep -q ' ListGetDetectString$'
-nm -D --defined-only "$PLUGIN" | grep -q ' MarkdownWlxLicense$'
-nm -D --defined-only "$PLUGIN" | grep -q ' MarkdownWlxVersion$'
-ldd "$PLUGIN" | grep -q 'libQt5Widgets'
+case "$SYSTEM" in
+  Linux)
+    SYMBOLS=$(nm -D --defined-only "$PLUGIN")
+    PREFIX=
+    ldd "$PLUGIN" | grep -q 'libQt5Widgets'
+    ;;
+  Darwin)
+    file "$PLUGIN" | grep -q 'Mach-O 64-bit dynamically linked shared library arm64'
+    [ "$(lipo -archs "$PLUGIN")" = arm64 ]
+    codesign --verify --strict "$PLUGIN"
+    SYMBOLS=$(nm -gU "$PLUGIN")
+    PREFIX=_
+    DEPENDENCIES=$(otool -L "$PLUGIN")
+    printf '%s\n' "$DEPENDENCIES" | grep -q '/AppKit.framework/'
+    printf '%s\n' "$DEPENDENCIES" | grep -q '/WebKit.framework/'
+    if printf '%s\n' "$DEPENDENCIES" | grep -q 'Qt'; then
+      printf 'unexpected Qt dependency in Cocoa plugin\n' >&2
+      exit 1
+    fi
+    ;;
+esac
+for SYMBOL in ListLoad ListCloseWindow ListGetDetectString MarkdownWlxLicense MarkdownWlxVersion; do
+  printf '%s\n' "$SYMBOLS" | grep -q " $PREFIX$SYMBOL\$"
+done
 
 PLUGIN="$PLUGIN" python3 - <<'PY'
 import ctypes
@@ -37,9 +55,12 @@ assert b'EUPL 1.2' in license_fn(), license_fn()
 
 version_fn = plugin.MarkdownWlxVersion
 version_fn.restype = ctypes.c_char_p
-assert version_fn() == b'0.2.1', version_fn()
+assert version_fn() == b'0.3.0', version_fn()
 print(f"ok: {os.path.basename(os.environ['PLUGIN'])}: {buffer.value.decode()}")
 PY
+
+# Cocoa widget behavior is tested manually in the actual Double Commander host.
+[ "$SYSTEM" = Linux ] || exit 0
 
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT HUP INT TERM

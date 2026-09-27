@@ -1,8 +1,12 @@
 ---
-status: Accepted
+status: Superseded
 date: 2026-09-22
 ---
 # Rust Rewrite and Qt5 Primary Target
+
+The Qt5-only target restriction is superseded by
+[ADR 0006](0006-native-cocoa-apple-silicon.md). The shared Rust architecture
+and renderer decisions remain in effect.
 
 ## Context and Problem Statement
 

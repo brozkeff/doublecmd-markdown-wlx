@@ -4,6 +4,30 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [v0.3.0] - 2026-09-27
+
+### Added
+
+- Native Apple Silicon Cocoa backend using system WebKit, with JavaScript,
+  resource loading, navigation, and new windows disabled.
+- Native platform build selection, macOS ABI checks, ad-hoc signing, and a
+  macOS installation helper. Linux builds continue to use Qt5.
+
+### Changed
+
+- Reuse Rust rendering and WLX handling across Linux and macOS.
+- Reject FIFOs without blocking on both supported platforms.
+
+### Tested
+
+- Built and ABI checked the signed ARM64 Cocoa plugin locally on macOS.
+- User manually tested the copied Cocoa plugin successfully in Double
+  Commander 1.2.7 gamma, revision 359 (`3a3c1ab3e`), on macOS 27.0.0.
+- Rust tests, formatting, and Clippy passed on Apple Silicon. Linux Qt5
+  regression validation remains pending on a Linux machine.
+
 ## [v0.2.1] - 2026-09-22
 
 ### Fixed

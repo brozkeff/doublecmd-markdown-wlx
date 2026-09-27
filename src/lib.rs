@@ -1,11 +1,10 @@
 // Copyright (C) 2026 Martin Brozkeff Malec
 // Licensed under the EUPL, Version 1.2.
 
-//! Standalone Rust Linux WLX plugin for safe Markdown previews in Qt5 Double Commander.
+//! Standalone Rust WLX plugin for safe Markdown previews in Qt5 or Cocoa Double Commander.
 //!
 //! Rust owns WLX validation, bounded file reading, Markdown rendering, and
-//! panic containment. A narrow C++ shim owns QWidget creation and destruction
-//! because Qt does not expose a stable C ABI.
+//! panic containment. A narrow native shim owns platform view creation and destruction.
 
 mod markdown;
 
@@ -22,15 +21,15 @@ use std::path::{Path, PathBuf};
 const MAX_PREVIEW_BYTES: usize = 4 * 1024 * 1024;
 const DETECT_STRING: &[u8] = b"EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MDOWN\"";
 const LICENSE: &[u8] = b"Copyright (C) 2026 Martin Brozkeff Malec; licensed under the EUPL 1.2\0";
-const VERSION: &[u8] = b"0.2.1\0";
+const VERSION: &[u8] = concat!(env!("CARGO_PKG_VERSION"), "\0").as_bytes();
 
 unsafe extern "C" {
-    fn markdown_wlx_qt5_create(
+    fn markdown_wlx_create(
         parent_handle: *mut c_void,
         html: *const c_char,
         html_length: usize,
     ) -> *mut c_void;
-    fn markdown_wlx_qt5_destroy(window_handle: *mut c_void);
+    fn markdown_wlx_destroy(window_handle: *mut c_void);
 }
 
 fn guarded<T>(operation: impl FnOnce() -> T) -> Option<T> {
@@ -68,7 +67,7 @@ fn source_from_bytes(mut bytes: Vec<u8>) -> Result<String, ()> {
 fn read_source(path: &Path) -> Result<String, ()> {
     let mut options = OpenOptions::new();
     options.read(true);
-    #[cfg(target_os = "linux")]
+    #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         // Opening a FIFO without O_NONBLOCK could hang the host GUI thread.
@@ -100,10 +99,10 @@ fn load_plugin(parent: *mut c_void, file_to_load: *const c_char) -> *mut c_void 
         return std::ptr::null_mut();
     }
 
-    // SAFETY: WLX calls ListLoad on the Qt GUI thread with a live QWidget
-    // parent. The HTML pointer stays valid for the synchronous call, and the
-    // C++ shim copies it into QTextBrowser without retaining the pointer.
-    unsafe { markdown_wlx_qt5_create(parent, html.as_ptr().cast(), html.len()) }
+    // SAFETY: WLX calls ListLoad on the host GUI thread with a live native
+    // parent (QWidget on Linux, NSView on macOS). The shim copies the HTML
+    // during this call without retaining the borrowed pointer.
+    unsafe { markdown_wlx_create(parent, html.as_ptr().cast(), html.len()) }
 }
 
 /// Creates the read-only Markdown preview widget, or returns a null WLX handle.
@@ -120,14 +119,14 @@ pub extern "C" fn ListLoad(
 ///
 /// # Safety
 /// `list_window` must be null or a live widget returned by this plugin, and
-/// this function must run on the Qt GUI thread exactly once for that widget.
+/// this function must run on the host GUI thread exactly once for that view.
 #[no_mangle]
 pub unsafe extern "C" fn ListCloseWindow(list_window: *mut c_void) {
     let _ = guarded(|| {
         if !list_window.is_null() {
             // SAFETY: The WLX host passes the live handle previously returned
-            // by ListLoad and closes it on the Qt GUI thread.
-            unsafe { markdown_wlx_qt5_destroy(list_window) };
+            // by ListLoad and closes it on the host GUI thread.
+            unsafe { markdown_wlx_destroy(list_window) };
         }
     });
 }

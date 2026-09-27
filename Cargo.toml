@@ -1,13 +1,13 @@
 [package]
 name = "markdown-wlx"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.82"
 license = "EUPL-1.2"
 build = "build.rs"
 
 [lib]
-name = "markdown_wlx_qt5"
+name = "markdown_wlx"
 crate-type = ["cdylib"]
 
 [dependencies]
