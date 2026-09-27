@@ -2,8 +2,9 @@
 
 The Rust plugin links code from the crates below. Versions and checksums are
 pinned in `Cargo.lock`. Where a dependency offers a choice of licenses, this
-distribution uses its MIT license. Qt5 and the C++ runtime are system-provided
-shared libraries and are not bundled with the plugin.
+distribution uses its MIT license. Qt5 on Linux, AppKit and WebKit on macOS,
+and the C++ runtime are system-provided shared libraries and are not bundled
+with the plugin.
 
 | Crate | Version | License |
 | --- | --- | --- |

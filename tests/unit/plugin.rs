@@ -41,3 +41,70 @@ fn detection_string_is_nul_terminated_and_truncated_safely() {
 }
 
 const DETECT_LEN: usize = b"EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MDOWN\"".len();
+
+#[test]
+fn reads_unicode_paths_and_rejects_missing_files_and_directories() {
+    let root = test_directory("paths");
+    let path = root.join("příliš-🦀.md");
+    std::fs::write(&path, b"\xef\xbb\xbf# hello").unwrap();
+    let source = read_source(&path);
+    let missing = read_source(&root.join("missing.md"));
+    let directory = read_source(&root);
+    std::fs::remove_dir_all(root).unwrap();
+    assert_eq!(source, Ok("# hello".into()));
+    assert!(missing.is_err());
+    assert!(directory.is_err());
+}
+
+#[test]
+fn enforces_limit_when_reading_a_file() {
+    let root = test_directory("limit");
+    let path = root.join("large.md");
+    std::fs::write(&path, vec![b'a'; MAX_PREVIEW_BYTES]).unwrap();
+    let exact = read_source(&path);
+    std::fs::write(&path, vec![b'a'; MAX_PREVIEW_BYTES + 1]).unwrap();
+    let oversized = read_source(&path);
+    std::fs::remove_dir_all(root).unwrap();
+    assert_eq!(exact.unwrap().len(), MAX_PREVIEW_BYTES);
+    assert!(oversized.is_err());
+}
+
+#[cfg(unix)]
+#[test]
+fn rejects_fifo_without_waiting_for_a_writer() {
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    let root = test_directory("fifo");
+    let path = root.join("pipe.md");
+    let name = CString::new(path.as_os_str().as_bytes()).unwrap();
+    // SAFETY: name is a valid NUL-terminated path, and mkfifo retains no pointer.
+    assert_eq!(unsafe { libc::mkfifo(name.as_ptr(), 0o600) }, 0);
+    let result = read_source(&path);
+    std::fs::remove_dir_all(root).unwrap();
+    assert!(result.is_err());
+}
+
+#[test]
+fn rejects_null_load_arguments_without_entering_the_widget_bridge() {
+    assert!(super::ListLoad(std::ptr::null_mut(), std::ptr::null(), 0).is_null());
+    let mut parent_placeholder = 0_u8;
+    assert!(super::ListLoad(
+        std::ptr::from_mut(&mut parent_placeholder).cast(),
+        std::ptr::null(),
+        0,
+    )
+    .is_null());
+}
+
+fn test_directory(label: &str) -> std::path::PathBuf {
+    let root = std::env::temp_dir().join(format!(
+        "markdown-wlx-{}-{label}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir(&root).unwrap();
+    root
+}

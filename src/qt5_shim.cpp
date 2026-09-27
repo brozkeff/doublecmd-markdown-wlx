@@ -51,9 +51,9 @@ private:
   QPointer<QTextBrowser> browser_;
 };
 
-extern "C" void *markdown_wlx_qt5_create(void *parent_handle,
-                                          const char *html,
-                                          std::size_t html_length) noexcept {
+extern "C" void *markdown_wlx_create(void *parent_handle,
+                                     const char *html,
+                                     std::size_t html_length) noexcept {
   if (parent_handle == nullptr || html == nullptr || html_length > INT_MAX) {
     return nullptr;
   }
@@ -79,7 +79,7 @@ extern "C" void *markdown_wlx_qt5_create(void *parent_handle,
   }
 }
 
-extern "C" void markdown_wlx_qt5_destroy(void *window_handle) noexcept {
+extern "C" void markdown_wlx_destroy(void *window_handle) noexcept {
   try {
     delete static_cast<QTextBrowser *>(window_handle);
   } catch (...) {
